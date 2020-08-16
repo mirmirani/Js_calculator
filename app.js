@@ -6,9 +6,15 @@ const calculator = {
 };
 
 function inputDigit(digit) {
-    const {displayValue} = calculator;
+    const {displayValue, waitingForSecondOperand} = calculator;
+    
+    if (waitingForSecondOperand === true) {
+        calculator.displayValue = digit;
+        calculator.waitingForSecondOperand = false;
+    } else {
     calculator.displayValue = displayValue === '0' ? digit : displayValue + digit;
-    console.log(calculator);
+}
+console.log(calculator);
 }
 
 function inputDecimal(dot) {
@@ -19,15 +25,43 @@ function inputDecimal(dot) {
 
 function handleOperator(nextOperator) {
     const {firstOperand, displayValue, operator } = calculator
+    //const firstOperand = calculator.firstOperand;
+    //const displayValue = calculator.displayValue;
+    //const operator = calculator.operator;
     const inputValue = parseFloat(displayValue);
+
+    if (operator && calculator.waitingForSecondOperand) {
+        calculator.operator = nextOperator;
+        console.log(calculator);
+        return;
+    };
 
     if (firstOperand === null && !isNaN(inputValue)) {
         calculator.firstOperand = inputValue;
+    } else if (operator) {
+        const result = calculate(firstOperand, inputValue, operator);
+
+        calculator.displayValue = String(result);
+        calculate.firstOperand = result;
     }
 
     calculator.waitingForSecondOperand = true;
     calculator.operator = nextOperator;
     console.log(calculator);
+}
+
+function calculate(firstOperand, secondOperand, operator) {
+    if (operator === '+') {
+        return firstOperand + secondOperand;
+    } else if (operator === '-') {
+        return firstOperand - secondOperand;
+    } else if (operator === '*') {
+        return firstOperand * secondOperand;
+    } else if (operator === '/') {
+        return firstOperand / secondOperand;
+    }
+
+    return secondOperand;
 }
 
 function updateDisplay() {
@@ -70,4 +104,4 @@ keys.addEventListener('click', (event) => {
 });
 
 
-//continue from input a decimal point
+//continue from reset the calculator
