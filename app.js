@@ -6,7 +6,9 @@ const calculator = {
 };
 
 function inputDigit(digit) {
-    const {displayValue, waitingForSecondOperand} = calculator;
+    const {
+        displayValue,
+        waitingForSecondOperand} = calculator;
     
     if (waitingForSecondOperand === true) {
         calculator.displayValue = digit;
@@ -18,13 +20,22 @@ console.log(calculator);
 }
 
 function inputDecimal(dot) {
+    if (calculator.waitingForSecondOperand === true) {
+        calculator.displayValue = '0.'
+        calculator.waitingForSecondOperand = false;
+        return
+    }
+
     if (!calculator.displayValue.includes(dot)) {
         calculator.displayValue += dot;
     }
 }
 
 function handleOperator(nextOperator) {
-    const {firstOperand, displayValue, operator } = calculator
+    const {
+        firstOperand,
+        displayValue,
+        operator } = calculator
     //const firstOperand = calculator.firstOperand;
     //const displayValue = calculator.displayValue;
     //const operator = calculator.operator;
@@ -32,7 +43,6 @@ function handleOperator(nextOperator) {
 
     if (operator && calculator.waitingForSecondOperand) {
         calculator.operator = nextOperator;
-        console.log(calculator);
         return;
     };
 
@@ -41,13 +51,12 @@ function handleOperator(nextOperator) {
     } else if (operator) {
         const result = calculate(firstOperand, inputValue, operator);
 
-        calculator.displayValue = String(result);
-        calculate.firstOperand = result;
+        calculator.displayValue = `${parseFloat(result.toFixed(7))}`;
+        calculator.firstOperand = result;
     }
 
     calculator.waitingForSecondOperand = true;
     calculator.operator = nextOperator;
-    console.log(calculator);
 }
 
 function calculate(firstOperand, secondOperand, operator) {
@@ -64,6 +73,16 @@ function calculate(firstOperand, secondOperand, operator) {
     return secondOperand;
 }
 
+function resetCalculator() {
+    calculator.displayValue = '0';
+    calculator.firstOperand = null;
+    calculator.waitingForSecondOperand= false;
+    calculator.operator = null;
+    console.log(calculator)
+
+
+}
+
 function updateDisplay() {
     const display = document.querySelector('.calculator-screen');
     display.value = calculator.displayValue;
@@ -72,33 +91,35 @@ function updateDisplay() {
 updateDisplay();
 
 const keys = document.querySelector('.calculator-keys');
+
 keys.addEventListener('click', (event) => {
     const {target} = event;
+    const {value} = target;
     //same as target = event.target;
-
     if (!target.matches('button')) {
         return;
     }
 
-    if (target.classList.contains('operator')){
-        handleOperator(target.value);
-        updateDisplay();
-        return;
+    switch(value) {
+        case '+':
+        case '-':
+        case '*':
+        case '/':
+        case '=':
+            handleOperator(value);
+            break;
+        case '.':
+            inputDecimal(value);
+            break;
+        case 'all-clear':
+            resetCalculator();
+            break;
+        default:
+            if (Number.isInteger(parseFloat(value))) {
+                inputDigit(value);
+            }
     }
 
-    if (target.classList.contains('decimal')) {
-        inputDecimal(target.value);
-        updateDisplay();
-        return;
-    }
-
-    if (target.classList.contains('all-clear')) {
-        console.log('clear', target.value)
-        return;
-    }
-
-    //del: console.log('digit', target.value);
-    inputDigit(target.value);
     updateDisplay();
 
 });
